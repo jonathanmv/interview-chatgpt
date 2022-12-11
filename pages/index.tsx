@@ -2,6 +2,8 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 
 import React, { useState, useEffect } from 'react';
+import AudioRecorder, { AudioRecorderType } from '../lib/AudioRecorder';
+
 
 type RecordClipProps = {
   onStart: () => void;
@@ -28,6 +30,26 @@ const RecordClip: React.FC<RecordClipProps> = ({ onStart, onStop }) => {
   )
 }
 
+const RecordController = () => {
+  const [recorder, setRecorder] = useState<AudioRecorderType>();
+
+  useEffect(() => {
+    AudioRecorder.record().then(setRecorder);
+    () => recorder?.stop();
+  }, []);
+
+  const onStart = () => recorder?.start();
+  const onStop = async () => {
+    if (!recorder) return;
+
+    const { audioUrl } = await recorder.stop();
+    console.log('playing audio...');
+    new Audio(audioUrl).play();
+  }
+
+  return <RecordClip onStart={onStart} onStop={onStop} />
+}
+
 
 export default function Home() {
   return (
@@ -39,7 +61,7 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <RecordClip onStart={() => {}} onStop={() => {}} />
+        <RecordController />
       </main>
 
       <footer className={styles.footer}>
