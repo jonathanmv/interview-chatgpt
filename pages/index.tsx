@@ -42,9 +42,20 @@ const RecordController = () => {
   const onStop = async () => {
     if (!recorder) return;
 
-    const { audioUrl } = await recorder.stop();
+    const { audioUrl, audioBlob } = await recorder.stop();
     console.log('playing audio...');
     new Audio(audioUrl).play();
+
+    // Send audio to the backend
+    console.log('sending audio to backend...')
+    const response = await fetch('/api/ask-chatgpt', {
+      method: 'POST',
+      headers: {
+        "content-type": "audio/webm"
+      },
+      body: audioBlob
+    });
+    console.log(await response.json());
   }
 
   return <RecordClip onStart={onStart} onStop={onStop} />
